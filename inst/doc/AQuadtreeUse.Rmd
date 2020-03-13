@@ -1,0 +1,218 @@
+---
+title: "Quadtree anonymization of point data"
+author: "Raymond Lagonigro, Ramon Oller, Joan Carles Martori"
+date: '`r Sys.Date()`'
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_crop: no
+    fig_width: 5
+    number_sections: yes
+    toc: yes
+geometry: left=2.54cm,right=2.54cm,top=2.54cm,bottom=2.54cm
+header-includes: \usepackage{subfig}
+classoption: a4paper
+bibliography: References.bib
+vignette: >
+  %\VignetteIndexEntry{Quadtree anonymization of point data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+options(width=80)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  warning=FALSE, 
+  message=FALSE,
+  fig.show='hold',
+  tidy.opts=list(width.cutoff=80),
+  tidy=TRUE,
+  comment = "##"
+)
+
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    x = unlist(sapply(x, function(x){
+      if (nchar(x) > n) {
+        paste(strwrap(x, width = n), collapse = paste0('\n', options$comment, ' '))
+      } else {
+        x
+      }
+    }, simplify = T, USE.NAMES = FALSE))
+  }
+  hook_output(x, options)
+})
+
+
+library(AQuadtree)
+```
+
+# Introduction
+The AQuadtree package provides an automatic aggregation tool to anonymise point data. The framework proposed seeks the data accuracy at the smallest possible areas preventing individual information disclosure. Aggregation and local suppression of point data is performed using a methodology based on hierarchical geographic data structures. The final result is a varying size grid adapted to local area population densities described in @Lagonigro2017. 
+
+The grid is created following the guidelines for grid datasets of the GEOSTAT project [@GEOSTAT1B2014] and the INSPIRE grid coding system is adopted as defined in the INSPIRE Data specifications [@INSPIRE2010]. Geospatial specifications use the European Terrestrial Reference System 89, Lambert Azimuthal Equal Area (ETRS89-LAEA) projection [@Annoni2003]. In the definition of the grid dataset, each cell is identified by a code composed of the cell's size and the coordinates of the lower left cell corner in the ETRS89-LAEA system. The cell's size is denoted in meters (“m”) for cells' sizes up to 1000 meters, or kilometers (“km”) for cells' sizes from 1000 meters and above. To reduce the length of the string, values for northing and easting are divided by 10n (where “n” is the number of zeros in the cell size value measured in meters). 
+
+> The cell code “1kmN2599E4695“ identifies the 1km grid cell with coordinates of the lower left corner: Y=2599000m, X=4695000m.
+
+The aggregation algorithm implemented in the package builds an initial regular grid of a given cell size, identifying each cell with the corresponding cell code. Each initial cell is recursively subdivided in quadrants where each new cell is assigned a second identifier containing a sequence of numbers to indicate the position of the cell in the disaggregation scheme. For instance, the sequence identifier corresponding to the right top cell in the right image in Figure \ref{fig:Figure 1} would be 416, i.e. fourth cell in the first division, and sixteenth cell in the second division.
+
+```{r echo=FALSE, fig.align='center', out.width="60%", fig.cap="\\label{fig:Figure 1}Three level quadtree splitting cell numbering example. Initial cell on the (left);  first quadtree subdivision (center); second quadtree subdivision (right)", fig.show='hold'}
+knitr::include_graphics('images/Fig1.png')
+```
+
+To ensure data privacy, a cell is only split if all the resulting subdivisions satisfy the threshold restriction on the number of points. In cases of very irregular point pattern, this restriction results in less accuracy on the cell resolution. For instance, Figure \ref{fig:Figure 2}a presents a pattern of 932 points unevenly distributed on a 1km cell and Figure \ref{fig:Figure 2}b shows the corresponding grid of 62.5m cells with no threshold restrictions (the total number of points aggregated in each cell is shown).
+
+```{r echo=FALSE, fig.align='center', out.width="25%", fig.cap="\\label{fig:Figure 2}Set of spatial points (a) and the corresponding 62.5m grid with no threshold restrictions (b) (the numbers indicate the points aggregated in each cell).", fig.subcap=rep("", 4), fig.show='hold'}
+knitr::include_graphics(c('images/Fig2a.png','images/Fig2b.png'))
+```
+
+If we define an anonymity threshold of 17, the cell in Figure \ref{fig:Figure 2}a can not be subdivided because one of the four resulting quadrants contains only 4 points. The privacy mechanism aggregates all the points, as presented in Figure \ref{fig:Figure 3}a, and covers an irregular spatial distribution. The AQuadtree algorithm contemplates the suppression of some points before continuing the disaggregation. For instance, suppressing the 4 points in the top right quadrant of Figure \ref{fig:Figure 2}b results in the disaggregation shown in Figure \ref{fig:Figure 3}b, which clearly is much more accurate to the underlying spatial distribution. Moreover, the elimination of more data points would lead to further disaggregation (Figure \ref{fig:Figure 3}c and Figure \ref{fig:Figure 3}d).
+
+```{r echo=FALSE, fig.align='center', out.width="24%", fig.cap="\\label{fig:Figure 3}Disaggregation examples with threshold value 17. No disaggregation and no loss (a); disaggregation with suppression of 4 points (b) ; more disaggregation with suppression of 12 points (c); maximum disaggregation with suppression of 29 points (d).", fig.subcap=rep("", 4), fig.show='hold'}
+
+knitr::include_graphics(c('images/Fig3a.png','images/Fig3b.png','images/Fig3c.png','images/Fig3d.png'))
+```
+
+In order to balance information loss and resolution accuracy on the process of splitting a cell, the method computes the Theil inequality measure [@theil1972statistical] for the number of points in the possible quadrants as well as the percentage of points needed to be suppressed to force the division. In those cases where the anonymity threshold value prevents disaggregation, high values on the inequality measure may suggest the need for further subdivision, while high values on the loss rate may suggest to stop this subdivision. The algorithm uses default limits for both measures: 0.25 and 0.4. respectively (both values can be defined between 0 and 1). Thus, if there exists any sub-cell with a number of points lower than the anonymity threshold and the inequality measure is higher than 0.25, then the disaggregation process continues by suppressing those points as long as the loss rate is lower than 0.4. Hence, following with example in Figure \ref{fig:Figure 2}, the default disaggregation produced by the method would be the one shown in Figure \ref{fig:Figure 3}b.
+
+All the suppressed points during the process are aggregated in a cell with the initial dimension so their information does not disappear. This cell is marked as a residual cell. Following with the example in Figure \ref{fig:Figure 2}, if the number of suppressed points overcome the anonymity threshold, as for instance, in Figure 3d, the 29 suppressed points are aggregated in a cell of the initial given dimension, which will be marked as a residual cell (see Figure \ref{fig:Figure 4}).
+
+
+```{r echo=FALSE, fig.align='center', out.width="28%", fig.cap="\\label{fig:Figure 4}Example of a residual cell.", fig.show='hold'}
+knitr::include_graphics('images/Fig4.png')
+```
+
+
+# The AQuadtree Class
+
+An AQuadtree class object is a spatial dataset representing a varying size grid and is created performing an aggregation of a given set of points considering a minimum threshold for the number of points in each cell. The AQuadtree main function of the package creates the AQuadtree object from _`SpatialPoints`_ or _`SpatialPointsDataFrame`_ objects.
+
+```{r}
+example.QT<-AQuadtree(CharlestonPop)
+class(example.QT)
+```
+
+The AQuadtree class proposes a collection of methods to manage the generated objects and overrides the generic methods _`show`_, _`print`_, _`summary`_ and _`[`_ (subsetting) for the AQuadtree signature. The _`plot`_ method overrides the generic function for plotting R objects with an extra parameter to specify if residual cells should be plotted. The _`spplot`_ function overrides the lattice-based plot method from sp package [@Pebesma2005], with two extra parameters to control if residual cells should be displayed, and wether attributes should be divided by the cell areas to make different zones comparable. The _`merge`_ method merges data from an input data frame to the given AQuadtree object. The _`writeOGR.QT`_ method coerces the given AQuadtree object to a _`SpatialPolygonsDataframe`_ and uses the writeOGR method from rgdal package [@bivand2014rgdal] to write out spatial vector data. An AQuadtree object can also be coerced to a SpatialPolygonsDataFrame using the generic method _`as`_ from methods package.
+
+```{r echo=2:4, fig.align='center', out.width="40%", fig.cap="AQuadtree plot and spplot"}
+oldpar<-par(mar = c(0,0,0,0))
+bcn.QT<-AQuadtree(BarcelonaPop)
+plot(bcn.QT)
+spplot(bcn.QT, by.density=TRUE)
+par(oldpar)
+```
+
+
+## Controlling the grid resolution
+
+The characteristics of the AQuadtree object can be adjusted with various parameters. First, the _`dim`_ parameter defines the size in meters of the highest scale cells and the _`layers`_  parameter indicates the number of disaggregation levels. Thus, specifying the parameters _`dim=10000`_ and _`layers=4`_ would create a grid with cells of sizes between 10km and 1.25km. The default values establish an initial size of 1000 meters and 3 levels of disaggregation. 
+
+
+```{r, linewidth=90}
+charleston.QT<-AQuadtree(CharlestonPop, dim = 10000, layers = 4)
+summary(charleston.QT)
+```
+
+## Summarizing data
+
+The _`colnames`_ parameter specifies the columns on the original dataset to summarize in the resulting grid. An extra attribute _`total`_, containing the number of points in each cell is automatically created and added to the dataframe. On the aggregation process, attributes specified in _`colnames`_ parameter will be summarized using the _'sum'_ function. A list of alternative summarizing functions can can be provided with the _`funs`_ parameter. If any attribute indicated in the _`colnames`_ parameter is a factor, the function creates a new attribute for each label of the factor. For instance, an attribute sex with two labels, _`man`_ and _`woman`_, would be deployed into the two attributes _`sex.man`_ and _`sex.woman`_.
+
+```{r, linewidth=90 }
+class(BarcelonaPop$sex)
+levels(BarcelonaPop$sex)
+bcn.QT<-AQuadtree(BarcelonaPop, colnames = names(BarcelonaPop), funs = c('mean', 'sum'))
+summary(bcn.QT)
+```
+
+
+## Specifying a threshold and threshold fields
+
+The package applies a default anonymity threshold value of 100 and it can be changed with the _`threshold`_ parameter. If nothing else is indicated, the threshold restriction is applied only to the total number of points aggregated in each cell (i.e. the _`total`_ attribute added to the resulting dataset). When some of the attributes include confidential information, the threshold restriction can be applied to various properties with the _`thresholdField`_ parameter, indicating the list of attributes from the resulting dataset that must satisfy that given threshold.
+
+```{r, linewidth=90 }
+bcn.QT<-AQuadtree(BarcelonaPop, colnames = c('age','sex'), 
+	funs = c('mean', 'sum'), threshold=17, 
+	thresholdField=c("sex.man", "sex.woman"))
+summary(bcn.QT)
+```
+
+## Balancing information loss and accuracy
+
+In order to control the disaggregation process, two more parameters set the thresholds on the inequity and loss rate. The extra parameter _`ineq.threshold`_, a rate between 0 and 1, specifies a threshold to force disaggregation when there is high inequality between sub-cells. The Theil entropy measure  in the _`ineq`_ package [@zeileis2009package] is used to measure inequality. The _`ineq.threshold`_ parameter defaults to 0.25. Lower values in the _`ineq.threshold`_ produce grids with smaller cells (see Figure \ref{fig:Figure 6}).
+
+```{r echo=2:5, fig.align='center', out.width="40%", fig.cap="\\label{fig:Figure 6}Examples of the effect of the ineq.threshold parameter."}
+oldpar<-par(mar = c(0,0,0,0))
+bcn.QT <- AQuadtree(BarcelonaPop, threshold = 5, ineq.threshold = 0.01)
+plot(bcn.QT)
+bcn.QT <- AQuadtree(BarcelonaPop, threshold = 5, ineq.threshold = 0.5)
+plot(bcn.QT)
+par(oldpar)
+```
+
+On the other side, the parameter _`loss.threshold`_, also a rate between 0 and 1, indicates a rate of loss to prevent disaggregation of cells. A low value states that lower loss is preferred on the resulting grid so less disaggregation is obtained. The loss threshold prevails over the inequality threshold.
+
+## AQuadtree object structure
+
+A call to the AQuadtree function will return an AQuadtree class object with six slots indicating the parameters used on the creation of the grid:  
+
+* _`dim`_: scale in meters of the highest level cells 
+* _`layers`_: number of subdivision levels
+* _`colnames`_: attribute names summarized in the resulting grid 
+* _`threshold`_: the value used for anonymization
+* _`thresholdField`_: attribute names to which the threshold restriction has been applied
+* _`loss`_: number of points discarded during the process of disaggregation because of the threshold
+
+```{r, linewidth=90}
+bcn.QT<-AQuadtree(BarcelonaPop)
+slotNames(bcn.QT)
+```
+
+The data slot contains a dataframe with the information comprised in each cell:
+
+* _`total`_: number of points grouped in the cell.
+* _`level`_: scale of disaggregation of the cell.
+* _`residual`_: logical value indicating if the cell contains only residual points. Residual points are those that have been suppressed on the disaggregation process to get better accuracy, but can be grouped at the highest scale cell as it overcomes the given threshold. 
+* _`cellCode`_: cell's size and the coordinates of the lower left cell corner in the ETRS89-LAEA system at the highest aggregation level.
+* _`cellNum`_: sequence of numbers indicating the position of the cell in the disaggregation scheme.
+
+```{r, linewidth=90}
+names(bcn.QT)
+head(bcn.QT)
+```
+
+# Provided data
+
+The package includes two _`SpatialPointsDataFrame`_ objects: _`BarcelonaPop`_ for the city of Barcelona (Spain) and _`CharlestonPop`_ for the Charleston, SC metropolitan area (USA). Both objects contain random point data with the distributions of real data acquired at census scale from different sources.
+The package also provides two _`SpatialPolygons`_ objects with the spatial boundaries for each region. _`BarcelonaCensusTracts`_ and _`CharlestonCensusTracts`_ contain, respectively, the census tracts spatial limits for the city of Barcelona, and the census tracts spatial limits for the Charleston, SC metropolitan area.
+
+_`BarcelonaPop`_ comprises 81,359 sample points in the city of Barcelona, Spain. The original information was obtained from the statistics department of the Ajuntament de Barcelona, providing population data at the census tract level for the year 2018 [@AjuntamentdeBarcelona.DepartamentdEstadistica2018]. The points were generated and distributed randomly in space, maintaining unchanged the information at each census tract. To reduce the file size, only a sample of 7% of the points have been maintained.
+
+```{r, linewidth=90}
+data("BarcelonaPop", package = "AQuadtree")
+summary(BarcelonaPop)
+```
+
+In a similar way, the _`CharlestonPop`_ object, with 54,619 random sample points, was created using the information in the dataset Charleston1 from the 2000 Census Tract Data for the Charleston, SC metropolitan area (USA) [@GeodaDataandLab2019]. To reduce the file size, only a sample of 10% of the points have been maintained.
+
+```{r, linewidth=90}
+data("CharlestonPop", package = "AQuadtree")
+summary(CharlestonPop)
+```
+
+
+# Session info
+
+Here is the output of session_info("AQuadtree") on the system on which this document was compiled:
+
+```{r}
+devtools::session_info("AQuadtree")
+```
+
+
+# References

@@ -38,4 +38,14 @@ Barcelona.QT<-AQuadtree(BarcelonaPop)
 BcnWomen75yPop<-BarcelonaPop[BarcelonaPop$sex=='woman' & BarcelonaPop$age>=75, 'age']
 Barcelona.extended.QT<-pointsToAQuadtree(Barcelona.QT, BcnWomen75yPop)
 
+\dontrun{
+## not an AQuadtree object
+pointsToAQuadtree(CharlestonCensusTracts, CharlestonPop)
+
+## spatial object not projected
+sp.not.projected<-spTransform(CharlestonPop,CRS("+proj=longlat +datum=NAD27"))
+is.projected(sp.not.projected)
+pointsToAQuadtree(AQuadtree(CharlestonPop), sp.not.projected)
+
+}
 }

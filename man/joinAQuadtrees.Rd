@@ -2,7 +2,7 @@
 % Please edit documentation in R/joinAQuadtrees.R
 \name{joinAQuadtrees}
 \alias{joinAQuadtrees}
-\title{Join two AQuadtree obtjects from the same area, to compare their data}
+\title{Join two AQuadtree objects from the same area, to compare their data}
 \usage{
 joinAQuadtrees(qt1, qt2, withResiduals = FALSE, mean.1 = NULL, mean.2 = NULL)
 }
@@ -47,4 +47,8 @@ CharlestonPop.AQT_2<-AQuadtree(CharlestonPop, colnames="sex",
        thresholdField=c("sex.male", "sex.female"), layers = 2)
 CharlestonPop.AQT_1_2<-joinAQuadtrees(CharlestonPop.AQT_1, CharlestonPop.AQT_2)
 
+\dontrun{
+## non AQuadtree objects
+joinAQuadtrees(CharlestonPop, CharlestonCensusTracts)
+}
 }

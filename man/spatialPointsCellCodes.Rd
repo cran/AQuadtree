@@ -52,12 +52,20 @@ For instance, the cellNum of the top right cell would be 416 (fourth
 in first partition, sixteenth in second partition)\cr
 \if{html}{\figure{CellNum.jpg}{options: width=200 alt="Hyerarchical CellNums"}}
 \if{latex}{\figure{CellNum.jpg}{options: width=4cm}}
+The input object must be projected and units should be in 'meters'
+because the system uses the INSPIRE coding system.
 }
 \examples{
 data("BarcelonaPop")
 BarcelonaPop.IDs<-spatialPointsCellCodes(BarcelonaPop)
 BarcelonaPop.IDs.10km<-spatialPointsCellCodes(BarcelonaPop, 10000, 3)
 
+\dontrun{
+## spatial object not projected
+sp.not.projected<-spTransform(CharlestonPop,CRS("+proj=longlat +datum=NAD27"))
+is.projected(sp.not.projected)
+spatialPointsCellCodes(sp.not.projected)
+}
 }
 \seealso{
 \itemize{

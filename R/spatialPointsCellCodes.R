@@ -25,6 +25,9 @@
 #' in first partition, sixteenth in second partition)\cr
 #' \if{html}{\figure{CellNum.jpg}{options: width=200 alt="Hyerarchical CellNums"}}
 #' \if{latex}{\figure{CellNum.jpg}{options: width=4cm}}
+#' The input object must be projected and units should be in 'meters'
+#' because the system uses the INSPIRE coding system.
+#'
 #' @seealso
 #' \itemize{
 #'   \item{
@@ -56,6 +59,12 @@
 #' BarcelonaPop.IDs<-spatialPointsCellCodes(BarcelonaPop)
 #' BarcelonaPop.IDs.10km<-spatialPointsCellCodes(BarcelonaPop, 10000, 3)
 #'
+#' \dontrun{
+#' ## spatial object not projected
+#' sp.not.projected<-spTransform(CharlestonPop,CRS("+proj=longlat +datum=NAD27"))
+#' is.projected(sp.not.projected)
+#' spatialPointsCellCodes(sp.not.projected)
+#' }
 spatialPointsCellCodes <- function(points, dim=1000, layers=1){
   ## aux function to determine the number of trailing zeros
   trailingZeros<-function(x){
@@ -69,7 +78,9 @@ spatialPointsCellCodes <- function(points, dim=1000, layers=1){
   if (missing(points)) stop("argument 'points' is missing missing, with no default", call.="FALSE")
   if (length(points)==0) stop("argument 'points' has length 0", call.="FALSE")
   #stopifnot(require("sp"))
-  stopifnot(dim>0, (class(points) %in% c("SpatialPoints", "SpatialPointsDataFrame")))
+  stopifnot(dim>0)
+  if (!inherits(points, "SpatialPoints")) stop("argument 'points' is not a 'SpatialPoints' or 'SpatialPointsDataFrame' object", call.="FALSE")
+  if (!is.projected(points)) stop("spatial data must be projected", call.="FALSE")
 
   # calculate string CellCode of the form "1kmNyyyyExxxx"
   sizePrefix<-ifelse(dim>=1000, paste0(dim/1000, "km"), paste0(dim, "m"))

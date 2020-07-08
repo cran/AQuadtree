@@ -50,7 +50,7 @@ disaggregation process. Forces disaggregation under the given inequality
 threshold.}
 
 \item{loss.threshold}{loss threshold value to be considered on the
-disaggregation process. Forces aggregation when there's much loss
+disaggregation process. Stops disaggregation when there's much loss
 (i.e loss rate > ineq.threshold ).}
 }
 \value{
@@ -96,13 +96,15 @@ identifier  of a 10000 meter cell starts with “10km”.\cr
 The coordinate part of the cell code reflects the distance of the lower left
 grid cell corner from the false origin of the CRS. In order to reduce the
 length of the string, Easting (E) and Northing (N) values are divided by
-10n (n is the number of zeros in the cell size value). Example for a cell
+10^n (n is the number of zeros in the cell size value). Example for a cell
 size of 10000 meters: The number of zeros in the cell size value is 4.
 The resulting divider for Easting and Northing values is 10^4 = 10000.\cr
 The cellNum is a sequence of concatenated integers identifying all the
 hierarchical partitions of the main cell in which the point resides.
 For instance, the cellNum of the top right cell would be 416 (fourth
 in first partition, sixteenth in second partition)\cr
+The input object must be projected and units should be in 'meters'
+because the system uses the INSPIRE coding system.
 }
 \examples{
 data("CharlestonPop")

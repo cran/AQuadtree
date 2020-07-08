@@ -40,17 +40,17 @@ INSPIRE Specification on Geographical Grid Systems\cr
 The objective of the coding system is to generate unique identifiers for each
 point, for any of the recommended resolutions.\cr
 The cellCode is a text string, composed of cell size and cell coordinates.
-Cell codes start with a cell size prefix. The cell size is denoted in meter (m)
-for cell sizes below 1000 m and kilometre (km) for cell sizes from 1000 m and
+Cell codes start with the cell's size prefix. The cell size is denoted in meter (m)
+for cell sizes below 1000m and kilometre (km) for cell sizes from 1000m and
 above.\cr
 Examples: a 100 meter cell has an identifier starting with “100m”, the
 identifier  of a 10000 meter cell starts with “10km”.\cr
 The coordinate part of the cell code reflects the distance of the lower left
 grid cell corner from the false origin of the CRS. In order to reduce the
 length of the string, Easting (E) and Northing (N) values are divided by
-10n (n is the number of zeros in the cell size value). Example for a cell
+10^n (n is the number of zeros in the cell size value). Example for a cell
 size of 10000 meters: The number of zeros in the cell size value is 4.
-The resulting divider for Easting and Northing values is 104 = 10000.\cr
+The resulting divider for Easting and Northing values is 10^4 = 10000.\cr
 }
 \examples{
 data("BarcelonaPop")

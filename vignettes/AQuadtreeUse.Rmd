@@ -56,7 +56,7 @@ library(AQuadtree)
 # Introduction
 The AQuadtree package provides an automatic aggregation tool to anonymise point data. The framework proposed seeks the data accuracy at the smallest possible areas preventing individual information disclosure. Aggregation and local suppression of point data is performed using a methodology based on hierarchical geographic data structures. The final result is a varying size grid adapted to local area population densities described in @Lagonigro2017. 
 
-The grid is created following the guidelines for grid datasets of the GEOSTAT project [@GEOSTAT1B2014] and the INSPIRE grid coding system is adopted as defined in the INSPIRE Data specifications [@INSPIRE2010]. Geospatial specifications use the European Terrestrial Reference System 89, Lambert Azimuthal Equal Area (ETRS89-LAEA) projection [@Annoni2003]. In the definition of the grid dataset, each cell is identified by a code composed of the cell's size and the coordinates of the lower left cell corner in the ETRS89-LAEA system. The cell's size is denoted in meters (“m”) for cells' sizes up to 1000 meters, or kilometers (“km”) for cells' sizes from 1000 meters and above. To reduce the length of the string, values for northing and easting are divided by 10n (where “n” is the number of zeros in the cell size value measured in meters). 
+The grid is created following the guidelines for grid datasets of the GEOSTAT project [@GEOSTAT1B2014] and the INSPIRE grid coding system is adopted as defined in the INSPIRE Data specifications [@INSPIRE2010]. Geospatial specifications use the European Terrestrial Reference System 89, Lambert Azimuthal Equal Area (ETRS89-LAEA) projection [@Annoni2003], although other Coordinate Reference Systems (CRS) and projections are also be used with the package. In the definition of the grid dataset, each cell is identified by a code composed of the cell's size and the coordinates of the lower left cell corner in the ETRS89-LAEA system. The cell's size is denoted in meters (“m”) for cells' sizes up to 1000 meters, or kilometers (“km”) for cells' sizes from 1000 meters and above. To reduce the length of the string, values for northing and easting are divided by 10n (where “n” is the number of zeros in the cell size value measured in meters). 
 
 > The cell code “1kmN2599E4695“ identifies the 1km grid cell with coordinates of the lower left corner: Y=2599000m, X=4695000m.
 
@@ -144,7 +144,7 @@ summary(bcn.QT)
 
 ## Balancing information loss and accuracy
 
-In order to control the disaggregation process, two more parameters set the thresholds on the inequity and loss rate. The extra parameter _`ineq.threshold`_, a rate between 0 and 1, specifies a threshold to force disaggregation when there is high inequality between sub-cells. The Theil entropy measure  in the _`ineq`_ package [@zeileis2009package] is used to measure inequality. The _`ineq.threshold`_ parameter defaults to 0.25. Lower values in the _`ineq.threshold`_ produce grids with smaller cells (see Figure \ref{fig:Figure 6}).
+In order to control the disaggregation process, two more parameters set the thresholds on the inequity and loss rate. The extra parameter _`ineq.threshold`_, a rate between 0 and 1, specifies a threshold to force disaggregation when there is high inequality between sub-cells. The Theil entropy measure as computed in the _`ineq`_ package [@zeileis2009package] is used to measure inequality for each cell. The _`ineq.threshold`_ parameter defaults to 0.25. Lower values in the _`ineq.threshold`_ produce grids with smaller cells (see Figure \ref{fig:Figure 6}).
 
 ```{r echo=2:5, fig.align='center', out.width="40%", fig.cap="\\label{fig:Figure 6}Examples of the effect of the ineq.threshold parameter."}
 oldpar<-par(mar = c(0,0,0,0))
@@ -155,7 +155,7 @@ plot(bcn.QT)
 par(oldpar)
 ```
 
-On the other side, the parameter _`loss.threshold`_, also a rate between 0 and 1, indicates a rate of loss to prevent disaggregation of cells. A low value states that lower loss is preferred on the resulting grid so less disaggregation is obtained. The loss threshold prevails over the inequality threshold.
+On the other side, the parameter _`loss.threshold`_, also a rate between 0 and 1, indicates a rate of loss to prevent disaggregation of cells. A low value states that lower loss is preferred on the resulting grid so less disaggregation is obtained.
 
 ## AQuadtree object structure
 

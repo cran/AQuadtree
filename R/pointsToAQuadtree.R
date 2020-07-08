@@ -28,13 +28,24 @@
 #' BcnWomen75yPop<-BarcelonaPop[BarcelonaPop$sex=='woman' & BarcelonaPop$age>=75, 'age']
 #' Barcelona.extended.QT<-pointsToAQuadtree(Barcelona.QT, BcnWomen75yPop)
 #'
+#' \dontrun{
+#' ## not an AQuadtree object
+#' pointsToAQuadtree(CharlestonCensusTracts, CharlestonPop)
+#'
+#' ## spatial object not projected
+#' sp.not.projected<-spTransform(CharlestonPop,CRS("+proj=longlat +datum=NAD27"))
+#' is.projected(sp.not.projected)
+#' pointsToAQuadtree(AQuadtree(CharlestonPop), sp.not.projected)
+#'
+#' }
 pointsToAQuadtree<-function(qt, points){
   cellCode<-NULL
   if (missing(qt)) stop("argument 'qt' is missing, with no default", call.="FALSE")
-  if (missing(points)) stop("argument 'points' is missing, with no default", call.="FALSE")
+  stopifnot(class(qt)=="AQuadtree")
   if (length(qt)==0) stop("argument 'qt' has length 0", call.="FALSE")
+  if (missing(points)) stop("argument 'points' is missing, with no default", call.="FALSE")
   if (length(points)==0) stop("argument 'points' has length 0", call.="FALSE")
-  stopifnot((class(points) %in% c("SpatialPoints", "SpatialPointsDataFrame")))
+  if (!inherits(points, "SpatialPoints")) stop("argument 'points' is not a 'SpatialPoints' or 'SpatialPointsDataFrame' object", call.="FALSE")
   stopifnot(is.projected(qt), is.projected(points), proj4string(qt)==proj4string(points))
   if (any(bbox(points)<0)) stop("negative bbox not permited, use a different projection", call.="FALSE")
 

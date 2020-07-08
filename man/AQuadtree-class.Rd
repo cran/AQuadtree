@@ -91,13 +91,15 @@ identifier  of a 10000 meter cell starts with “10km”.\cr
 The coordinate part of the cell code reflects the distance of the lower left
 grid cell corner from the false origin of the CRS. In order to reduce the
 length of the string, Easting (E) and Northing (N) values are divided by
-10n (n is the number of zeros in the cell size value). Example for a cell
+10^n (n is the number of zeros in the cell size value). Example for a cell
 size of 10000 meters: The number of zeros in the cell size value is 4.
 The resulting divider for Easting and Northing values is 10^4 = 10000.\cr
 The CellNum is a sequence of concatenated integers identifying all the
 hierarchical partitions of the main cell in which the point resides.
 For instance, the CellNum of the top right cell would be 416 (fourth
 in first partition, sixteenth in second partition)\cr
+The input object must be projected and units should be in 'meters'
+because the system uses the INSPIRE coding system.
 
 function to create an object of class AQuadtree
 }
@@ -125,7 +127,19 @@ plot(aquadtree.Barcelona)
 aQuadtree.Charleston<-AQuadtree(CharlestonPop, colnames="sex", threshold=17,
   thresholdField=c("sex.male", "sex.female"))
 
+\dontrun{
+## spatial object not projected
+sp.not.projected<-spTransform(CharlestonPop,CRS("+proj=longlat +datum=NAD27"))
+is.projected(sp.not.projected)
+aqt<-AQuadtree(sp.not.projected)
 
+## not an SpatialPoints object
+aqt<-AQuadtree(CharlestonCensusTracts)
+
+## too many subdivisions
+aqt<-AQuadtree(CharlestonPop, layers=15)
+
+}
 }
 \seealso{
 \itemize{

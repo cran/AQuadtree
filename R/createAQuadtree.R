@@ -42,14 +42,16 @@
 #' The coordinate part of the cell code reflects the distance of the lower left
 #' grid cell corner from the false origin of the CRS. In order to reduce the
 #' length of the string, Easting (E) and Northing (N) values are divided by
-#' 10n (n is the number of zeros in the cell size value). Example for a cell
+#' 10^n (n is the number of zeros in the cell size value). Example for a cell
 #' size of 10000 meters: The number of zeros in the cell size value is 4.
 #' The resulting divider for Easting and Northing values is 10^4 = 10000.\cr
 #' The cellNum is a sequence of concatenated integers identifying all the
 #' hierarchical partitions of the main cell in which the point resides.
 #' For instance, the cellNum of the top right cell would be 416 (fourth
 #' in first partition, sixteenth in second partition)\cr
-
+#' The input object must be projected and units should be in 'meters'
+#' because the system uses the INSPIRE coding system.
+#'
 #' @seealso
 #' \itemize{
 #'   \item{
@@ -85,7 +87,7 @@
 #' disaggregation process. Forces disaggregation under the given inequality
 #' threshold.
 #' @param loss.threshold loss threshold value to be considered on the
-#' disaggregation process. Forces aggregation when there's much loss
+#' disaggregation process. Stops disaggregation when there's much loss
 #' (i.e loss rate > ineq.threshold ).
 #' @return SpatialPolygonsDataFrame representing a varying size Quadtree
 #' aggregation for the given points.
@@ -121,9 +123,10 @@ createAQuadtree <- function(points, dim=1000, layers=5, colnames=NULL, threshold
   #stopifnot(require("sp"), require("dplyr"))
   if (missing(points)) stop("argument 'points' is missing, with no default", call.="FALSE")
   if (length(points)==0) stop("argument 'points' has length 0", call.="FALSE")
-  stopifnot(dim>0, layers>=2, (class(points) %in% c("SpatialPoints", "SpatialPointsDataFrame")))
-  stopifnot(is.projected(points))
-  if (layers>10) stop("10 layers maximum", call.="FALSE")
+  stopifnot(dim>0, layers>=2)
+  if (!inherits(points, "SpatialPoints")) stop("argument 'points' is not a 'SpatialPoints' or 'SpatialPointsDataFrame' object", call.="FALSE")
+  if (!is.projected(points)) stop("spatial data must be projected", call.="FALSE")
+  if (layers>10) stop("maximum 10 layers allowed", call.="FALSE")
   if (any(bbox(points)<0)) stop("negative bbox not permited, use a different projection", call.="FALSE")
   if (!(all(colnames %in% names(points)))) {
     stop(sprintf("some colnames (%s) not in object names (%s)", paste(colnames[!(colnames %in% names(points))] , collapse=", "), paste(names(points), collapse=", ")), call.="FALSE")
@@ -216,7 +219,7 @@ createAQuadtree <- function(points, dim=1000, layers=5, colnames=NULL, threshold
   }
   pts[c("x", "y", "CellOrigin.x", "CellOrigin.y")]<-NULL
   pts$cellCodesStr<-paste0(pts$cellCode, pts$cellNum)
-  message("layer:1\n")
+  ## message("layer:1\n")
   prevGrid <- pts %>% group_by(cellCode) %>% summarise_(.dots=summariseExpr)
 
   prevGrid<-prevGrid[apply(prevGrid[,thresholdField]>=threshold,1, all),]   # remove high level cells with underthreshold population
@@ -231,7 +234,7 @@ createAQuadtree <- function(points, dim=1000, layers=5, colnames=NULL, threshold
   # create elements of the quadtree aggregating at each level
   quadtree.Elements<-data.frame()
   for (i in 2:layers){
-    message("layer:", i, "\n")
+    ## message("layer:", i, "\n")
     actualcellNumPos<-cellNumPosStop[i]
     pts$cellCode<-substr(pts$cellCodesStr, 1, cellNumPosStop[i])
 

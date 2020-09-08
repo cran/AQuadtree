@@ -1,7 +1,7 @@
 Package: AQuadtree
 Title: Confidentiality of Spatial Point Data
-Version: 1.0.1
-Date: 2020-07-08
+Version: 1.0.2
+Date: 2020-09-07
 Authors@R: c(
     person("Raymond", "Lagonigro", email = "raymond.lagonigro@uvic.cat", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-8091-4296")),
     person("Ramon", "Oller", email = "ramon.oller@uvic.cat", role = "aut", comment = c(ORCID = "0000-0002-4333-0021")),
@@ -22,10 +22,10 @@ LazyData: true
 RoxygenNote: 7.0.2
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-07-08 15:27:02 UTC; raymond
+Packaged: 2020-09-07 07:53:45 UTC; raymond
 Author: Raymond Lagonigro [aut, cre] (<https://orcid.org/0000-0002-8091-4296>),
   Ramon Oller [aut] (<https://orcid.org/0000-0002-4333-0021>),
   Joan Carles Martori [aut] (<https://orcid.org/0000-0002-8400-5487>)
 Maintainer: Raymond Lagonigro <raymond.lagonigro@uvic.cat>
 Repository: CRAN
-Date/Publication: 2020-07-08 16:10:02 UTC
+Date/Publication: 2020-09-08 07:50:04 UTC

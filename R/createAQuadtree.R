@@ -325,7 +325,7 @@ createAQuadtree <- function(points, dim=1000, layers=5, colnames=NULL, threshold
                y=c(coords.y, coords.y, coords.y+actualDim, coords.y+actualDim, coords.y)
              )
              return (list( Polygons(list(Polygon(pol.points)), i)))
-           }, USE.NAMES = FALSE), proj4string=CRS(proj4string(points), doCheckCRSArgs=TRUE))
+           }, USE.NAMES = FALSE), proj4string=slot(points, "proj4string"))
   quadtree.Elements$cellNum<-substr(quadtree.Elements$cellCode, cellNumPosStart[2], cellNumPosStop[length(cellNumPosStop)])
   quadtree.Elements$cellCode<-substr(quadtree.Elements$cellCode, 1, cellNumPosStop[1])
   colOrder<-c("cellCode", "cellNum", "level", "residual", setdiff(colnames(quadtree.Elements), c("cellCode", "cellNum", "level", "residual")))

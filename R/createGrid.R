@@ -86,7 +86,7 @@ createGrid <- function(zone, dim=1000, intersect=TRUE, outline=FALSE) {
                 c(dim,dim),
                 c((zoneBbox[1,"max"]-zoneBbox[1,"min"])%/%dim+2,(zoneBbox[2,"max"]-zoneBbox[2,"min"])%/%dim+2))
     if (!is.na(is.projected(zone)) && is.projected(zone)) {
-      SPGrid.polygons<-as.SpatialPolygons.GridTopology(gridTop, CRS(proj4string(zone)))
+      SPGrid.polygons<-as.SpatialPolygons.GridTopology(gridTop, slot(zone, "proj4string"))
     } else {
       SPGrid.polygons<-as.SpatialPolygons.GridTopology(gridTop)
     }

@@ -5,7 +5,7 @@
 #' returns a new object of class AQuadtree aggregating the data from the points
 #' to the cells where each point fall.
 #' @importFrom methods new as
-#' @importFrom sp CRS proj4string
+#' @importFrom sp CRS proj4string identicalCRS
 #' @importFrom dplyr %>% summarise_ group_by summarise_at funs
 #' @details
 #' The function \code{pointsToAQuadtree} returns a new AQuadtree object with
@@ -46,7 +46,7 @@ pointsToAQuadtree<-function(qt, points){
   if (missing(points)) stop("argument 'points' is missing, with no default", call.="FALSE")
   if (length(points)==0) stop("argument 'points' has length 0", call.="FALSE")
   if (!inherits(points, "SpatialPoints")) stop("argument 'points' is not a 'SpatialPoints' or 'SpatialPointsDataFrame' object", call.="FALSE")
-  stopifnot(is.projected(qt), is.projected(points), proj4string(qt)==proj4string(points))
+  stopifnot(is.projected(qt), is.projected(points), identicalCRS(qt, points))
   if (any(bbox(points)<0)) stop("negative bbox not permited, use a different projection", call.="FALSE")
 
 

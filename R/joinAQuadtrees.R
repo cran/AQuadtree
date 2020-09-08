@@ -6,8 +6,8 @@
 #' shared level, summarising the data from both AQuadtrees.
 #' @importFrom methods new as
 #' @importFrom stats weighted.mean
-#' @importFrom sp SpatialPolygons Polygons Polygon CRS proj4string
-#' proj4string<- SpatialPolygonsDataFrame spChFIDs
+#' @importFrom sp SpatialPolygons Polygons Polygon CRS proj4string identicalCRS
+#' SpatialPolygonsDataFrame spChFIDs
 #' @importFrom dplyr summarise_at funs
 #' @details
 #' The function \code{joinAQuadtrees} creates a new AQuadtree object from two
@@ -45,7 +45,7 @@ joinAQuadtrees<-function(qt1, qt2, withResiduals=FALSE, mean.1=NULL, mean.2=NULL
   if (missing(qt1)) stop("argument 'qt1' is missing, with no default", call.="FALSE")
   if (missing(qt2)) stop("argument 'qt2' is missing, with no default", call.="FALSE")
   stopifnot(class(qt1)=="AQuadtree", class(qt2)=="AQuadtree", class(withResiduals)=="logical")
-  stopifnot(is.projected(qt1), is.projected(qt2), proj4string(qt1)==proj4string(qt2))
+  stopifnot(is.projected(qt1), is.projected(qt2), identicalCRS(qt1, qt2))
   if (qt1@dim != qt2@dim) stop("initial dimensions of 'qt1' and 'qt2' differ", call.="FALSE")
   if (!(all(mean.1 %in% qt1@colnames))) {
     stop(sprintf("some 'mean.1' vars (%s) not in object names (%s)", paste(mean.1[!(mean.1 %in% qt1@colnames)] , collapse=", "), paste(qt1@colnames, collapse=", ")), call.="FALSE")
@@ -72,7 +72,7 @@ joinAQuadtrees<-function(qt1, qt2, withResiduals=FALSE, mean.1=NULL, mean.2=NULL
 
 
   qt.act<-SpatialPolygonsDataFrame(SpatialPolygons(list()), data=data.frame())
-  proj4string(qt.act)<-proj4string(qt1)
+  slot(qt.act, "proj4string") <- slot(qt1, "proj4string")
 
   layerNumber<-max(qt1@layers, qt2@layers)
   cellCodes<-unique(union(qt1$cellCode, qt2$cellCode))

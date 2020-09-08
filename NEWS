@@ -1,6 +1,7 @@
-                       Changes in version 1.0.1
+                       Changes in version 1.0.2
 
 Enhancements
-
-  - Clarified some warning messages.
-  - Added some dontrun examples.
+  - changes to match dependencies on the upcoming new versions of sp and rgdal.
+  - Updated the "proj4string" slots in data files to match the new CRS representation.
+  - Changed the use of the proj4string() function to use the whole CRS object, including
+    the new WKT2_2019 string representation needed for PROJ >= 6 and GDAL >= 3.

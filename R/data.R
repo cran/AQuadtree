@@ -40,7 +40,7 @@
 #' in Catalonia for the year 2018.
 #' Population has been created randomly with the real distributions of census
 #' tracts from the dataset dividing the total population by 20
-#' (\url{https://www.bcn.cat/estadistica/catala/dades/tpob/pad/padro/a2018/edat/index.htm}).
+#' (\url{https://ajuntament.barcelona.cat/estadistica/catala/Estadistiques_per_temes/Poblacio_i_demografia/Poblacio/Padro_municipal_habitants/a2018/edat/index.htm}).
 #'
 #' @format A SpatialPointsDataFrame with 81359 rows and 2 attributes:
 #' \describe{

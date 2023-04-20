@@ -53,16 +53,19 @@ size of 10000 meters: The number of zeros in the cell size value is 4.
 The resulting divider for Easting and Northing values is 10^4 = 10000.\cr
 }
 \examples{
+
 data("BarcelonaPop")
 BarcelonaPop.INSPIRE_GRID<-createGrid(BarcelonaPop)
 plot(BarcelonaPop.INSPIRE_GRID)
 
+\dontrun{
 BarcelonaPop.INSPIRE_GRID.10km<-createGrid(BarcelonaPop, 10000, intersect=FALSE)
 plot(BarcelonaPop.INSPIRE_GRID.10km)
 
 data("BarcelonaCensusTracts")
 Barcelona.INSPIRE_GRID<-createGrid(BarcelonaCensusTracts, outline=TRUE)
 plot(Barcelona.INSPIRE_GRID)
+}
 
 }
 \seealso{

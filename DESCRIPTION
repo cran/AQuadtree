@@ -1,7 +1,7 @@
 Package: AQuadtree
 Title: Confidentiality of Spatial Point Data
-Version: 1.0.2
-Date: 2020-09-07
+Version: 1.0.3
+Date: 2023-04-19
 Authors@R: c(
     person("Raymond", "Lagonigro", email = "raymond.lagonigro@uvic.cat", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-8091-4296")),
     person("Ramon", "Oller", email = "ramon.oller@uvic.cat", role = "aut", comment = c(ORCID = "0000-0002-4333-0021")),
@@ -16,16 +16,16 @@ Description: Provides an automatic aggregation tool to manage point data privacy
     The data structures are created following the guidelines for grid datasets from the
     European Forum for Geography and Statistics. 
 License: MIT + file LICENSE
-Suggests: rgeos, rgdal, knitr, devtools, rmarkdown
+Suggests: sf, rgdal, knitr, devtools, rmarkdown
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-09-07 07:53:45 UTC; raymond
+Packaged: 2023-04-20 06:55:57 UTC; raymond
 Author: Raymond Lagonigro [aut, cre] (<https://orcid.org/0000-0002-8091-4296>),
   Ramon Oller [aut] (<https://orcid.org/0000-0002-4333-0021>),
   Joan Carles Martori [aut] (<https://orcid.org/0000-0002-8400-5487>)
 Maintainer: Raymond Lagonigro <raymond.lagonigro@uvic.cat>
 Repository: CRAN
-Date/Publication: 2020-09-08 07:50:04 UTC
+Date/Publication: 2023-04-20 07:20:02 UTC

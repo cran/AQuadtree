@@ -4,7 +4,9 @@
 \name{BarcelonaCensusTracts}
 \alias{BarcelonaCensusTracts}
 \title{Census tract borders of Barcelona city in Catalonia.}
-\format{A SpatialPolygons object}
+\format{
+A SpatialPolygons object
+}
 \usage{
 BarcelonaCensusTracts
 }

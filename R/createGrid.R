@@ -52,16 +52,19 @@
 #' the given size.
 #' @export
 #' @examples
+#'
 #' data("BarcelonaPop")
 #' BarcelonaPop.INSPIRE_GRID<-createGrid(BarcelonaPop)
 #' plot(BarcelonaPop.INSPIRE_GRID)
 #'
+#' \dontrun{
 #' BarcelonaPop.INSPIRE_GRID.10km<-createGrid(BarcelonaPop, 10000, intersect=FALSE)
 #' plot(BarcelonaPop.INSPIRE_GRID.10km)
 #'
 #' data("BarcelonaCensusTracts")
 #' Barcelona.INSPIRE_GRID<-createGrid(BarcelonaCensusTracts, outline=TRUE)
 #' plot(Barcelona.INSPIRE_GRID)
+#' }
 #'
 createGrid <- function(zone, dim=1000, intersect=TRUE, outline=FALSE) {
     ## aux function to determine the number of trailing zeros
@@ -73,8 +76,8 @@ createGrid <- function(zone, dim=1000, intersect=TRUE, outline=FALSE) {
       }
       return(i)
     }
-    # requires rgeos
-    if (outline) requireNamespace("rgeos", quietly = TRUE)
+    # requires sf
+    if (outline) requireNamespace("sf", quietly = TRUE)
     if (missing(zone)) stop("argument 'zone' is missing, with no default", call.="FALSE")
     stopifnot(dim>0, inherits(zone, c("SpatialPolygons", "SpatialPoints")))
     zoneBbox<-bbox(zone)
@@ -91,39 +94,17 @@ createGrid <- function(zone, dim=1000, intersect=TRUE, outline=FALSE) {
       SPGrid.polygons<-as.SpatialPolygons.GridTopology(gridTop)
     }
 
-    ## Create CellCodes for each cell
-    message("setting cell grid IDs...\n")
-    sizePrefix<-ifelse(dim>=1000, paste0(dim/1000, "km"), paste0(dim, "m"))
-    zerosToRemove<-as.integer(10^trailingZeros(dim))
-    SPGrid.polygons<-spChFIDs(SPGrid.polygons,
-                              sapply(SPGrid.polygons@polygons, function(pol) {
-                                cellCodeN<-bbox(pol)["y", "min"]%/%zerosToRemove
-                                cellCodeE<-bbox(pol)["x", "min"]%/%zerosToRemove
-                                lenCellCode<-max(nchar(trunc(cellCodeE)),nchar(trunc(cellCodeN)))
-                                paste0(sizePrefix, "N",formatC(cellCodeN, width=lenCellCode, flag=0, mode = 'integer'), "E",formatC(cellCodeE, width=lenCellCode, flag=0, mode = 'integer'))
-                              })
-    )
+    SPGrid.sf <- sf::st_as_sf(SPGrid.polygons)
 
     if (intersect) {
       message("intersecting...\n")
-      if (class(zone) %in% c("SpatialPointsDataFrame", "SpatialPoints")){
-        # add x, y cell origin to each point
-        zone$CellOrigin.x<-zone@coords[,1]%/%dim*dim
-        zone$CellOrigin.y<-zone@coords[,2]%/%dim*dim
-        # calculate CellCode of the form "1kmNyyyyExxxx"
-        cellCodeN<-zone$CellOrigin.y/zerosToRemove
-        cellCodeE<-zone$CellOrigin.x/zerosToRemove
-        lenCellCode<-max(nchar(trunc(cellCodeE)),nchar(trunc(cellCodeN)))
-        zone$CellCode<-paste0(sizePrefix, "N",formatC(cellCodeN, width=lenCellCode, flag=0, mode = 'integer'), "E",formatC(cellCodeE, width=lenCellCode, flag=0, mode = 'integer'))
-        SPGrid.polygons<-SPGrid.polygons[row.names(SPGrid.polygons)%in%zone$CellCode]
-      } else {
-        SPGrid.polygons<-SPGrid.polygons[zone]
-      }
+      zone.sf<-sf::st_as_sf(zone)
+      SPGrid.sf<-SPGrid.sf[sapply(sf::st_intersects(SPGrid.sf, zone.sf, sparse = T), any),]
     }
-    if (outline & class(zone) %in% c("SpatialPolygons", "SpatialPolygonsDataFrame")) {
+    if (outline & class(zone) %in% c("SpatialPolygons", "SpatialPolygonsDataFrame")){
       message("creating outline...\n")
-      SPGrid.polygons<-rgeos::gIntersection(zone, SPGrid.polygons, byid = c(FALSE, TRUE), drop_lower_td =TRUE)
+      SPGrid.sf<-sf::st_intersection(sf::st_union(zone.sf), SPGrid.sf)
     }
 
-    return(SPGrid.polygons)
+    return(as(SPGrid.sf, "Spatial"))
 }

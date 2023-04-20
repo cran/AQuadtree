@@ -4,7 +4,9 @@
 \name{CharlestonCensusTracts}
 \alias{CharlestonCensusTracts}
 \title{Census tract borders of Charleston, SC MSA, USA.}
-\format{A SpatialPolygons object with 117 polygons}
+\format{
+A SpatialPolygons object with 117 polygons
+}
 \usage{
 CharlestonCensusTracts
 }

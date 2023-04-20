@@ -1,3 +1,9 @@
+                       Changes in version 1.0.3
+
+Enhancements
+  - changed sp::over methods to sf corresponding methods.
+
+
                        Changes in version 1.0.2
 
 Enhancements

@@ -4,14 +4,16 @@
 \name{CharlestonPop}
 \alias{CharlestonPop}
 \title{Radomly created population points for Charleston, SC MSA, USA.}
-\format{A SpatialPointsDataFrame with 54619 rows and 3 attributes:
+\format{
+A SpatialPointsDataFrame with 54619 rows and 3 attributes:
 \describe{
   \item{age}{group age the individual as a factor with
    levels: "under16", "16_65", "over65"}
   \item{sex}{sex of the individual as a factor with levels: "male", "female"}
   \item{origin}{origin of the individual as a factor with
    levels: "asian", "black", "hisp", "multi_ra", "white"}
-}}
+}
+}
 \usage{
 CharlestonPop
 }

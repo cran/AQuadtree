@@ -9,7 +9,7 @@
 This package provides an S4 class for creating, manipulating
 and exporting spatial quadtree varying size grids, and for methods
 including print/show, plot, spplot, subset, [, [[, names,
-dim, summary, writeOGR.
+dim, summary, write.
 }
 \section{Introduction}{
 

@@ -375,36 +375,6 @@ setMethod("merge", signature = c(x="AQuadtree", y="data.frame"),
             )
           }
 )
-#'
-#'
-#' Method writeOGR.QT
-#' @rdname writeOGR.QT
-#' @title writeOGR.QT AQuadtree-method
-#' @details Exports a AQuadtree object as a SpatialPolygonsDataFrame using the
-#' OGR abstraction library
-#' @description
-#' this is a generic for which \emph{rgdal} package also provides function.
-#'
-#' @aliases writeOGR.QT
-#' @export
-#'
-#' @param obj an object of class AQuadtree.
-#' @param residual logical; if TRUE cells marked as residual cells are included
-#' @param ... passed through.
-#'
-setGeneric("writeOGR.QT", function(obj, residual=TRUE, ...) standardGeneric("writeOGR.QT"))
-
-#' @return if verbose=TRUE, a list of information about the attempted write operation
-#' @rdname writeOGR.QT
-#' @export
-setMethod("writeOGR.QT", "AQuadtree",
-          function(obj, residual=FALSE, ...){
-            stopifnot(requireNamespace("rgdal"))
-            if (residual) obj.SP<-as(obj, "SpatialPolygonsDataFrame")
-            else obj.SP<-as(obj[!obj$residual], "SpatialPolygonsDataFrame")
-            rgdal::writeOGR(obj.SP, ...)
-          }
-)
 #' Method area.QT
 #' @rdname area.QT
 #' @title area.QT AQuadtree-method
